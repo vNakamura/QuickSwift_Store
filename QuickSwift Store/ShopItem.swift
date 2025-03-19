@@ -10,19 +10,31 @@ import SwiftUI
 struct ShopItem: View {
     let price: String
     let name: String
+    let image: String
     
     var body: some View {
         NavigationLink(value: name) {
             VStack(alignment: .leading) {
                 ZStack(alignment: .bottomTrailing){
-                    Rectangle()
-                        .fill(.mint.gradient)
-                        .aspectRatio(1, contentMode: .fill)
+                    AsyncImage(url: URL(string: image)) { phase in
+                        if let image = phase.image {
+                            image.resizable()
+                        } else if phase.error != nil {
+                            Color.red
+                        } else {
+                            Color.gray
+                        }
+                    }
+                        .scaledToFit()
                         .cornerRadius(10)
                 }
                 Spacer(minLength: 10)
-                Text(price).font(.headline)
-                Text(name).font(.caption)
+                Text(price)
+                    .font(.headline)
+                Text(name)
+                    .font(.caption)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
             .padding(8)
             .background {
@@ -40,5 +52,5 @@ struct ShopItem: View {
 }
 
 #Preview {
-    ShopItem(price: "$9.99", name: "Item 1")
+    ShopItem(price: "$9.99", name: "Item 1", image: "https://picsum.photos/200")
 }
