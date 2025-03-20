@@ -35,11 +35,6 @@ struct ShopItem: View {
                 Rectangle()
                     .fill(.ultraThinMaterial)
                     .cornerRadius(14)
-                    .shadow(
-                        color: .secondary.opacity(0.3),
-                        radius: 4,
-                        y: 2
-                    )
             }
         }
     }

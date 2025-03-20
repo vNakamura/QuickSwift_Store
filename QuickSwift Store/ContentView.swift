@@ -8,55 +8,19 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var products = [Product]()
-    func loadProducts() async {
-        products = await ProductService.getAllProducts()
-    }
-    
-    func tab<Content: View>(
-        title: String,
-        @ViewBuilder content: () -> Content?
-    ) -> some View {
-        NavigationStack {
-            ScrollView {
-                content()
-            }
-            .navigationTitle(title)
-        }
-    }
+    @State var currentTab = ProductList.tag
     
     var body: some View {
-        TabView {
-            Tab("Browse", systemImage: "storefront") {
-                NavigationStack {
-                    ScrollView{
-                        LazyVGrid(
-                            columns: [
-                                GridItem(.adaptive(minimum: 128), spacing: 15)
-                            ], spacing: 30
-                        ) {
-                            ForEach(products) { product in
-                                ShopItem(product: product)
-                            }
-                        }
-                        .padding(.horizontal, 10)
-                    }
-                    .scrollBounceBehavior(.basedOnSize)
-                    .task {
-                        if products.isEmpty {
-                            await loadProducts()                            
-                        }
-                    }
-                    .navigationDestination(for: Product.self) { product in
-                        ProductDetails(product: product)
-                    }
-                    .navigationTitle("QuickSwift Store")
-                }
+        TabView(selection: $currentTab) {
+            Tab("Browse", systemImage: "storefront", value: ProductList.tag) {
+                ProductList()
             }
-            Tab("Cart", systemImage: "cart.fill") {
-                Text("Cart")
+            Tab("Cart", systemImage: "cart.fill", value: Cart.tag) {
+                Cart(startShoppingAction: {
+                    currentTab = ProductList.tag
+                })
             }
-            Tab("User", systemImage: "person.fill") {
+            Tab("User", systemImage: "person.fill", value: "user") {
                 Text("User")
             }
         }
