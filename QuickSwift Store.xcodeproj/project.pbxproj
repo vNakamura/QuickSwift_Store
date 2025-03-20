@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		24282C8D2D8BB8DE005701D7 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 24282C8C2D8BB8DE005701D7 /* NukeUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		24282C682D86F4D9005701D7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				24282C8D2D8BB8DE005701D7 /* NukeUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = "QuickSwift Store";
 			packageProductDependencies = (
+				24282C8C2D8BB8DE005701D7 /* NukeUI */,
 			);
 			productName = "QuickSwift Store";
 			productReference = 24282C562D86F4D6005701D7 /* QuickSwift Store.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 24282C4D2D86F4D6005701D7;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				24282C8B2D8BB8DE005701D7 /* XCRemoteSwiftPackageReference "Nuke" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 24282C572D86F4D6005701D7 /* Products */;
 			projectDirPath = "";
@@ -583,6 +592,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		24282C8B2D8BB8DE005701D7 /* XCRemoteSwiftPackageReference "Nuke" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:kean/Nuke.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		24282C8C2D8BB8DE005701D7 /* NukeUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 24282C8B2D8BB8DE005701D7 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 24282C4E2D86F4D6005701D7 /* Project object */;
 }

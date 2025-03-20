@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NukeUI
 
 struct ShopItem: View {
     let price: String
@@ -15,19 +16,24 @@ struct ShopItem: View {
     var body: some View {
         NavigationLink(value: name) {
             VStack(alignment: .leading) {
-                ZStack(alignment: .bottomTrailing){
-                    AsyncImage(url: URL(string: image)) { phase in
+                ZStack(alignment: .center) {
+                    Color.white
+                    LazyImage(url: URL(string: image)) { phase in
                         if let image = phase.image {
                             image.resizable()
                         } else if phase.error != nil {
-                            Color.red
+                            Image(systemName: "photo")
+                                .font(.title)
+                                .foregroundStyle(.secondary)
                         } else {
-                            Color.gray
+                            ProgressView()
                         }
                     }
+                        .padding()
                         .scaledToFit()
-                        .cornerRadius(10)
                 }
+                    .aspectRatio(1.0, contentMode: .fit)
+                    .cornerRadius(10)
                 Spacer(minLength: 10)
                 Text(price)
                     .font(.headline)
