@@ -6,38 +6,26 @@
 //
 
 import SwiftUI
-import NukeUI
+
+struct NoImage: View {
+    var body: some View {
+        Image(systemName: "photo")
+            .font(.title)
+            .foregroundStyle(.secondary)
+    }
+}
 
 struct ShopItem: View {
-    let price: String
-    let name: String
-    let image: String
+    let product: Product
     
     var body: some View {
-        NavigationLink(value: name) {
+        NavigationLink(value: product) {
             VStack(alignment: .leading) {
-                ZStack(alignment: .center) {
-                    Color.white
-                    LazyImage(url: URL(string: image)) { phase in
-                        if let image = phase.image {
-                            image.resizable()
-                        } else if phase.error != nil {
-                            Image(systemName: "photo")
-                                .font(.title)
-                                .foregroundStyle(.secondary)
-                        } else {
-                            ProgressView()
-                        }
-                    }
-                        .padding()
-                        .scaledToFit()
-                }
-                    .aspectRatio(1.0, contentMode: .fit)
-                    .cornerRadius(10)
+                ProductImage(url: product.image)
                 Spacer(minLength: 10)
-                Text(price)
+                Text(product.formattedPrice)
                     .font(.headline)
-                Text(name)
+                Text(product.name)
                     .font(.caption)
                     .lineLimit(1)
                     .truncationMode(.tail)
@@ -57,6 +45,9 @@ struct ShopItem: View {
     }
 }
 
-#Preview {
-    ShopItem(price: "$9.99", name: "Item 1", image: "https://picsum.photos/200")
+#Preview("With Image", traits: .fixedLayout(width: 200, height: 250)) {
+    ShopItem(product: Product.withImage)
+}
+#Preview("Without Image", traits: .fixedLayout(width: 200, height: 250)) {
+    ShopItem(product: Product.withoutImage)
 }
