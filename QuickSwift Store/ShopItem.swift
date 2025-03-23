@@ -16,7 +16,7 @@ struct NoImage: View {
 }
 
 struct ShopItem: View {
-    let product: Product
+    let product: ProductModel
     
     var body: some View {
         NavigationLink(value: product) {
@@ -41,8 +41,8 @@ struct ShopItem: View {
 }
 
 #Preview("With Image", traits: .fixedLayout(width: 200, height: 250)) {
-    ShopItem(product: Product.withImage)
+    ShopItem(product: ProductModel.withImage)
 }
 #Preview("Without Image", traits: .fixedLayout(width: 200, height: 250)) {
-    ShopItem(product: Product.withoutImage)
+    ShopItem(product: ProductModel.withoutImage)
 }

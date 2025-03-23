@@ -10,7 +10,7 @@ import SwiftUI
 struct ProductList: View {
     static let tag = "__tag_product_list__"
     
-    @State private var products = [Product]()
+    @State private var products = [ProductModel]()
     func loadProducts() async {
         products = await ProductService.getAllProducts()
     }
@@ -35,7 +35,7 @@ struct ProductList: View {
                     await loadProducts()
                 }
             }
-            .navigationDestination(for: Product.self) { product in
+            .navigationDestination(for: ProductModel.self) { product in
                 ProductDetails(product: product)
             }
             .navigationTitle("QuickSwift Store")

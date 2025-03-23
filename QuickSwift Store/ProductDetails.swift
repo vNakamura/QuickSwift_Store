@@ -6,16 +6,35 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ProductDetails: View {
-    var product: Product
-    @State var relatedProducts = [Product]()
+    var product: ProductModel
+    @State private var relatedProducts = [ProductModel]()
+    @Environment(\.modelContext) private var modelContext
+    @Query private var cartItems: [CartItemModel]
+    
+    init(product: ProductModel) {
+        self.product = product
+        _cartItems = Query(
+            filter: #Predicate { $0.id == product.id }
+        )
+    }
     
     func loadRelated() async {
         relatedProducts = await ProductService.getProducts(
             of: product.category,
             ignoring: product
         )
+    }
+    
+    func addToCart() {
+        if let existingItem = cartItems.first {
+            existingItem.amount += 1
+        } else {
+            let newItem = CartItemModel(product: product)
+            modelContext.insert(newItem)
+        }
     }
     
     var body: some View {
@@ -25,22 +44,39 @@ struct ProductDetails: View {
                     Text(product.category)
                         .font(.subheadline)
                     ProductImage(url: product.image)
+                    Text(product.name)
+                        .font(.title2)
                     HStack {
                         Text(product.formattedPrice)
                         Spacer()
-                        Button(action: addToCart) {
-                            Label("Add to Cart", systemImage: "cart.fill")
+                        if let item = cartItems.first {
+                            let amountBinding = Binding(
+                                get: { item.amount },
+                                set: { newValue in
+                                    item.amount = newValue
+                                }
+                            )
+                            ItemAmountStepper(
+                                value: amountBinding,
+                                prefix: "In Cart:"
+                            ) {
+                                modelContext.delete(item)
+                            }
+                        } else {
+                            Button(action: addToCart) {
+                                Label("Add to Cart", systemImage: "cart.fill")
+                            }
+                            .buttonStyle(.borderedProminent)
                         }
-                        .buttonStyle(.borderedProminent)
                     }
-                    .font(.title2)
-                    Text(product.description)
+                    .font(.title3)
+                    Text(product.descriptionText)
                     
                 }
                 .padding()
                 Spacer(minLength: 20)
                 Text("Related items")
-                    .font(.title)
+                    .font(.title2)
                 ScrollView(.horizontal){
                     HStack(spacing: 20) {
                         ForEach(relatedProducts) { related in
@@ -58,17 +94,12 @@ struct ProductDetails: View {
                 }
             }
         }
-        .navigationTitle(product.name)
-    }
-    
-    func addToCart() {
-        //TODO: Add to cart
-        print("Add product to cart: \(product.name)")
     }
 }
 
 #Preview {
     NavigationStack {
-        ProductDetails(product: Product.withImage)
+        ProductDetails(product: ProductModel.withImage)
     }
+    .modelContainer(previewContainer)
 }

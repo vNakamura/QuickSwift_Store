@@ -7,30 +7,35 @@
 
 import Foundation
 
-struct Product: Codable, Identifiable, Hashable {
-    let id: Int
-    let name: String
-    let price: Double
-    var formattedPrice: String {
-        return price.formatted(
+struct ProductModel: Codable, Identifiable, Hashable {
+    static func format(price unitPrice: Double, times: Int = 1) -> String {
+        let multipliedPrice = unitPrice * Double(times)
+        return multipliedPrice.formatted(
             .currency(code: "USD")
             .locale(Locale(identifier: "en_US"))
         )
     }
-    let description: String
-    let category: String
+    var id: Int
+    var name: String
+    var price: Double
+    var formattedPrice: String {
+        return ProductModel.format(price: price)
+    }
+    var descriptionText: String
+    var category: String
     var image: String? = nil
     
     private enum CodingKeys: String, CodingKey {
-        case id, price, description, category, image
+        case id, price, category, image
         case name = "title"
+        case descriptionText = "description"
     }
 }
 
 enum ProductService {
     static let apiURL = URL(string: "https://fakestoreapi.com/products")
     
-    static func getAllProducts() async -> [Product] {
+    static func getAllProducts() async -> [ProductModel] {
         //TODO: show errors to user
         guard let url = apiURL else {
             print("Invalid path")
@@ -39,7 +44,7 @@ enum ProductService {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             if let decoded = try? JSONDecoder().decode(
-                [Product].self, from: data
+                [ProductModel].self, from: data
             ) {
                 return decoded.shuffled()
             }
@@ -51,8 +56,8 @@ enum ProductService {
     
     static func getProducts(
         of category: String,
-        ignoring current: Product? = nil
-    ) async -> [Product] {
+        ignoring current: ProductModel? = nil
+    ) async -> [ProductModel] {
         guard let url = apiURL?
             .appending(path: "category")
             .appending(path: category)
@@ -63,7 +68,7 @@ enum ProductService {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             if let decoded = try? JSONDecoder().decode(
-                [Product].self, from: data
+                [ProductModel].self, from: data
             ) {
                 if current == nil {
                     return decoded.shuffled()
@@ -79,23 +84,3 @@ enum ProductService {
         return []
     }
 }
-
-#if DEBUG
-extension Product {
-    static let withImage = Product(
-        id: 1,
-        name: "With Image",
-        price: 9.99,
-        description: "A product to preview containing an image",
-        category: "sample",
-        image: "https://picsum.photos/200"
-    )
-    static let withoutImage = Product(
-        id: 2,
-        name: "Without Image",
-        price: 5.99,
-        description: "A product to preview containing no image",
-        category: "sample"
-    )
-}
-#endif

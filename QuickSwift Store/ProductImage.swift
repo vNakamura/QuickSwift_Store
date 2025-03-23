@@ -38,5 +38,5 @@ struct ProductImage: View {
 }
 
 #Preview {
-    ProductImage(url: Product.withImage.image)
+    ProductImage(url: ProductModel.withImage.image)
 }
