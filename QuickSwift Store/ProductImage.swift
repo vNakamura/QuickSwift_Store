@@ -29,11 +29,16 @@ struct ProductImage: View {
                     NoImage()
                 }
             }
-                .padding()
+                .cornerRadius(6)
+                .padding(6)
                 .scaledToFit()
         }
             .aspectRatio(1.0, contentMode: .fit)
             .cornerRadius(10)
+            .overlay {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(.ultraThinMaterial, lineWidth: 2)
+            }
     }
 }
 

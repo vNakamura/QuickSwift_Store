@@ -26,7 +26,7 @@ struct ItemAmountStepper: View {
         var icon = adjustment > 0 ? "plus" : "minus"
         var role: ButtonRole? = nil
         if value <= 1, adjustment < 0 {
-            icon = "multiply"
+            icon = "xmark.bin"
             role = .destructive
         }
         return Button(role: role) {

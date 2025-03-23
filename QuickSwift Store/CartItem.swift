@@ -19,6 +19,7 @@ struct CartItem: View {
                 VStack(alignment: .leading) {
                     Text(product.name)
                         .truncationMode(.tail)
+                    Spacer(minLength: 0)
                     HStack{
                         Text(
                             item.product?.formattedPrice ?? ""

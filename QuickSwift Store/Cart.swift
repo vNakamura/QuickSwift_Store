@@ -13,6 +13,7 @@ struct Cart: View {
     
     @Query(sort: \CartItemModel.addedAt) private var items: [CartItemModel]
     var startShoppingAction: (() -> Void)?
+    @State private var viewingProduct: ProductModel? = nil
     @Environment(\.modelContext) var modelContext
     
     private var subtotal: String {
@@ -33,6 +34,13 @@ struct Cart: View {
                     list
                 }
             }
+            .sheet(item: $viewingProduct) { product in
+                ProductDetails(product: product, showRelated: false) {
+                    viewingProduct = nil
+                }
+                    .presentationDetents([.fraction(0.75), .large])
+                    .presentationCompactAdaptation(.none)
+            }
             .navigationTitle("Shopping Cart")
         }
     }
@@ -50,28 +58,40 @@ struct Cart: View {
     }
     
     var list: some View {
-        List {
-            ForEach(items) { item in
-                CartItem(item: item) {
-                    modelContext.delete(item)
+        NavigationStack {
+            List {
+                ForEach(items) { item in
+                    Button {
+                        viewingProduct = item.product
+                    } label: {
+                        CartItem(item: item) {
+                            modelContext.delete(item)
+                        }
+                    }
+                    .listRowInsets(EdgeInsets(
+                        top: 12,
+                        leading: 8,
+                        bottom: 8,
+                        trailing: 8
+                    ))
+                    .buttonStyle(.plain)
                 }
-                .listRowInsets(EdgeInsets(
-                    top: 4,
-                    leading: 0,
-                    bottom: 2,
-                    trailing: 2
-                ))
-            }
-            .onDelete { offsets in
-                for offset in offsets {
-                    modelContext.delete(items[offset])
+                .onDelete { offsets in
+                    for offset in offsets {
+                        modelContext.delete(items[offset])
+                    }
+                }
+                Section("Subtotal") {
+                    Text(subtotal)
+                }
+                NavigationLink {
+                    Text("Checkout")
+                } label: {
+                    Label("Checkout", systemImage: "shippingbox")
                 }
             }
-            Section("Subtotal") {
-                Text(subtotal)
-            }
+            .listRowSpacing(6)
         }
-        .listRowSpacing(6)
     }
 }
 

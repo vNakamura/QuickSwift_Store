@@ -10,12 +10,20 @@ import SwiftData
 
 struct ProductDetails: View {
     var product: ProductModel
+    var showRelated: Bool
+    var onRemove: (() -> Void)?
     @State private var relatedProducts = [ProductModel]()
     @Environment(\.modelContext) private var modelContext
     @Query private var cartItems: [CartItemModel]
     
-    init(product: ProductModel) {
+    init(
+        product: ProductModel,
+        showRelated: Bool = true,
+        onRemove: (() -> Void)? = nil
+    ) {
         self.product = product
+        self.showRelated = showRelated
+        self.onRemove = onRemove
         _cartItems = Query(
             filter: #Predicate { $0.id == product.id }
         )
@@ -61,6 +69,7 @@ struct ProductDetails: View {
                                 prefix: "In Cart:"
                             ) {
                                 modelContext.delete(item)
+                                onRemove?()
                             }
                         } else {
                             Button(action: addToCart) {
@@ -75,21 +84,23 @@ struct ProductDetails: View {
                 }
                 .padding()
                 Spacer(minLength: 20)
+                if showRelated {
                 Text("Related items")
                     .font(.title2)
-                ScrollView(.horizontal){
-                    HStack(spacing: 20) {
-                        ForEach(relatedProducts) { related in
-                            ShopItem(product: related)
-                                .frame(idealWidth: 140)
+                    ScrollView(.horizontal){
+                        HStack(spacing: 20) {
+                            ForEach(relatedProducts) { related in
+                                ShopItem(product: related)
+                                    .frame(idealWidth: 140)
+                            }
                         }
+                        .padding(.horizontal)
+                        .padding(.bottom)
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom)
-                }
-                .task {
-                    if relatedProducts.isEmpty {
-                        await loadRelated()
+                    .task {
+                        if relatedProducts.isEmpty {
+                            await loadRelated()
+                        }
                     }
                 }
             }
@@ -97,9 +108,15 @@ struct ProductDetails: View {
     }
 }
 
-#Preview {
+#Preview("Normal") {
     NavigationStack {
         ProductDetails(product: ProductModel.withImage)
+    }
+    .modelContainer(previewContainer)
+}
+#Preview("No related items") {
+    NavigationStack {
+        ProductDetails(product: ProductModel.withImage, showRelated: false)
     }
     .modelContainer(previewContainer)
 }
