@@ -10,8 +10,9 @@ import SwiftData
 
 struct Checkout: View {
     @Query private var items: [CartItemModel]
-    @State private var address = ""
+    @AppStorage("delivery_address") private var address = ""
     @State private var deliveryOption: DeliveryOptionModel = .sample[0]
+    @AppStorage("payment_card") private var paymentCard = ""
     
     var products: some View {
         Section {
@@ -49,12 +50,14 @@ struct Checkout: View {
             NavigationLink {
                 AddressSearch(address: $address)
             } label: {
-                VStack {
+                Label {
                     Text("Address: ").bold() + (
                         address.isEmpty
                         ? Text("Search").italic().foregroundStyle(.secondary)
                         : Text(address)
                     )
+                } icon: {
+                    Image(systemName: "map")
                 }
             }
             if !address.isEmpty {
@@ -67,11 +70,71 @@ struct Checkout: View {
         }
     }
     
+    var payment: some View {
+        Section {
+            NavigationLink {
+                CardForm(input: $paymentCard)
+            } label: {
+                Label {
+                    Text("Credit Card: ").bold() + (
+                        paymentCard.isEmpty
+                        ? Text("Insert details")
+                            .italic().foregroundStyle(.secondary)
+                        : Text(paymentCard)
+                    )
+                } icon: {
+                    Image(systemName: "creditcard")
+                }
+            }
+        } header: {
+            Text("Payment")
+        }
+    }
+    
+    var total: String {
+        if address.isEmpty {
+            return "Awaiting delivery info"
+        }
+        let costs: [CartItemModel] = [
+            CartItemModel(
+                product: ProductModel(
+                    id: -1,
+                    name: "Shipping",
+                    price: deliveryOption.price,
+                    descriptionText: deliveryOption.name,
+                    category: "extra"
+                )
+            )
+        ]
+        return CartItemModel.sum(of: costs + items)
+    }
+    var blocked: Bool {
+        return address.isEmpty || paymentCard.isEmpty
+    }
+    var complete: some View {
+        Section {
+            Text("Total: ").bold()
+            + Text(total)
+                .foregroundStyle(blocked ? .secondary : .primary)
+                .italic(blocked)
+            Button {
+                
+            } label: {
+                Text("Place Order")
+                    .frame(minHeight: 32)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(blocked)
+        }
+    }
     
     var body: some View {
         List {
             products
             delivery
+            payment
+            complete
         }
         .navigationTitle("Checkout")
     }

@@ -47,9 +47,7 @@ struct DeliveryOption: View {
         Button {
             selected = option
         } label: {
-            HStack{
-                Image(systemName: icon)
-                    .foregroundStyle(Color.accentColor)
+            Label{
                 VStack(alignment: .leading) {
                     HStack {
                         Text(option.name)
@@ -60,7 +58,11 @@ struct DeliveryOption: View {
                     Text("Receive: ").font(.callout)
                     + Text(deliveryDate).bold()
                 }
+            } icon: {
+                Image(systemName: icon)
+                    .foregroundStyle(Color.accentColor)
             }
+                .contentShape(Rectangle()) // Ensure blank spaces can be tapped
         }
             .buttonStyle(.plain)
     }

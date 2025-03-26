@@ -89,9 +89,6 @@ struct Cart: View {
     }
 }
 
-#Preview("Empty") {
-    Cart()
-}
 #Preview("With Items") {
     let _ = [
         CartItemModel(product: .withImage, amount: 2),
@@ -101,4 +98,7 @@ struct Cart: View {
     }
     Cart()
         .modelContainer(previewContainer)
+}
+#Preview("Empty") {
+    Cart()
 }
