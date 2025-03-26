@@ -34,6 +34,10 @@ struct CardForm: View {
                 
                 TextField("Cardholder Name", text: $cardholderName)
                     .keyboardType(.namePhonePad)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        focusedField = nextField(after: .cardholderName)
+                    }
                     .focused($focusedField, equals: .cardholderName)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.words)
@@ -97,6 +101,12 @@ struct CardForm: View {
                 }
                 .disabled(!isFormValid)
             }
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button(toolbarLabel(for: focusedField)) {
+                    focusedField = nextField(after: focusedField)
+                }
+            }
         }
     }
     
@@ -122,94 +132,128 @@ struct CardForm: View {
         
         return true
     }
+    
+    func toolbarLabel(for field: Field?) -> String {
+        switch field {
+        case .cvv:
+            return "Done"
+        default:
+            return "Next"
+        }
+    }
+    func nextField(after field: Field?) ->Field? {
+        switch field {
+        case .cardNumber:
+            return .cardholderName
+        case .cardholderName:
+            return .expiryDate
+        case .expiryDate:
+            return .cvv
+        default:
+            return nil
+        }
+    }
 }
 
-struct CreditCardView: View {
-    let cardNumber: String
-    let cardholderName: String
-    let expiryDate: String
-    let cvv: String
-    let flipped: Bool
-    
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 15)
-                .fill(LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.blue.opacity(0.5),
-                        Color.blue.opacity(0.9)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
-                .shadow(radius: 6, y: 4)
-            
-            VStack {
-                if flipped {
-                    // CVV Back Side
-                    VStack(alignment: .leading) {
-                        Rectangle()
-                            .fill(Color(white: 0.3))
-                            .frame(height: 50)
-                            .padding(.top)
-                        Spacer()
-                        (
-                            Text("CVV: ").font(.caption)
-                            + Text(cvv).font(.title3).fontDesign(.monospaced)
-                        )
+extension CardForm {
+    struct CreditCardView: View {
+        let cardNumber: String
+        let cardholderName: String
+        let expiryDate: String
+        let cvv: String
+        let flipped: Bool
+        
+        @State var op = 1.0
+        
+        var body: some View {
+            ZStack {
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.blue.opacity(0.5),
+                            Color.blue.opacity(0.9)
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .shadow(radius: 6, y: 4)
+                
+                VStack {
+                    if flipped {
+                        // CVV Back Side
+                        VStack(alignment: .leading) {
+                            Rectangle()
+                                .fill(Color(white: 0.3))
+                                .frame(height: 50)
+                                .padding(.top)
+                            Spacer()
+                            (
+                                Text("CVV: ").font(.caption)
+                                + Text(cvv).font(.title3).fontDesign(.monospaced)
+                            )
                             .padding()
-                    }
-                    .rotation3DEffect(
-                        .degrees(180),
-                        axis: (x: 0.0, y: 1.0, z: 0.0)
-                    )
-                } else {
-                    // Front Side
-                    VStack(alignment: .leading, spacing: 15) {
-                        HStack {
-                            Spacer()
-                            Image(systemName: "creditcard.fill")
-                                .font(.title)
                         }
-                        
-                        Spacer()
-                        
-                        Text(formatCardNumber(cardNumber))
-                            .font(.title3)
-                            .fontDesign(.monospaced)
-                            .tracking(1)
-                        HStack {
-                            Text(cardholderName.isEmpty ? "John Doe" : cardholderName)
-                                .font(.caption)
-                                .textCase(.uppercase)
+                        .opacity(1.0 - op)
+                        .animation(.easeInOut(duration: 0.2), value: op)
+                        .rotation3DEffect(
+                            .degrees(180),
+                            axis: (x: 0.0, y: 1.0, z: 0.0)
+                        )
+                    } else {
+                        // Front Side
+                        VStack(alignment: .leading, spacing: 15) {
+                            HStack {
+                                Spacer()
+                                Image(systemName: "creditcard.fill")
+                                    .font(.title)
+                            }
                             
                             Spacer()
                             
-                            Text(expiryDate)
-                                .font(.caption)
+                            Text(formatCardNumber(cardNumber))
+                                .font(.title3)
+                                .fontDesign(.monospaced)
+                                .tracking(1)
+                            HStack {
+                                Text(cardholderName.isEmpty ? "John Doe" : cardholderName)
+                                    .font(.caption)
+                                    .textCase(.uppercase)
+                                
+                                Spacer()
+                                
+                                Text(expiryDate)
+                                    .font(.caption)
+                            }
                         }
+                        .opacity(op)
+                        .animation(.easeInOut(duration: 0.2), value: op)
+                        .padding()
                     }
-                    .padding()
                 }
             }
-        }
-        .foregroundStyle(.regularMaterial)
-        .aspectRatio(1.6, contentMode: .fit)
-        .rotation3DEffect(
-            .degrees(flipped ? 180 : 0),
-            axis: (x: 0.0, y: 1.0, z: 0.0)
-        )
-        .animation(.bouncy(duration: 0.5), value: flipped)
-    }
-    
-    private func formatCardNumber(_ number: String) -> String {
-        let cleaned = number.replacingOccurrences(of: " ", with: "")
-        let groups = stride(from: 0, to: cleaned.count, by: 4)
-            .map { startIndex in
-                let endIndex = min(startIndex + 4, cleaned.count)
-                return String(cleaned[cleaned.index(cleaned.startIndex, offsetBy: startIndex)..<cleaned.index(cleaned.startIndex, offsetBy: endIndex)])
+            .environment(\.colorScheme, .light)
+            .dynamicTypeSize(.medium)
+            .foregroundStyle(.regularMaterial)
+            .aspectRatio(1.6, contentMode: .fit)
+            .rotation3DEffect(
+                .degrees(flipped ? 180 : 0),
+                axis: (x: 0.0, y: 1.0, z: 0.0)
+            )
+            .animation(.bouncy, value: flipped)
+            .onChange(of: flipped) {
+                op = flipped ? 0.0 : 1.0
             }
-        return groups.joined(separator: " ")
+        }
+        
+        private func formatCardNumber(_ number: String) -> String {
+            let cleaned = number.replacingOccurrences(of: " ", with: "")
+            let groups = stride(from: 0, to: cleaned.count, by: 4)
+                .map { startIndex in
+                    let endIndex = min(startIndex + 4, cleaned.count)
+                    return String(cleaned[cleaned.index(cleaned.startIndex, offsetBy: startIndex)..<cleaned.index(cleaned.startIndex, offsetBy: endIndex)])
+                }
+            return groups.joined(separator: " ")
+        }
     }
 }
 

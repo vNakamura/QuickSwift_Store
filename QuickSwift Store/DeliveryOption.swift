@@ -24,7 +24,7 @@ struct DeliveryOption: View {
     @Binding var selected: DeliveryOptionModel
     
     private var icon: String {
-        return option == selected ? "circle.circle.fill" : "circle"
+        return option == selected ? "inset.filled.circle" : "circle"
     }
     private var deliveryDate: String {
         switch option.days {
@@ -61,6 +61,7 @@ struct DeliveryOption: View {
             } icon: {
                 Image(systemName: icon)
                     .foregroundStyle(Color.accentColor)
+                    .animation(.default, value: icon)
             }
                 .contentShape(Rectangle()) // Ensure blank spaces can be tapped
         }
