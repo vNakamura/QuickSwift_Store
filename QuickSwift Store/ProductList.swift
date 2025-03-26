@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ProductList: View {
     static let tag = "__tag_product_list__"
+    @Binding var navPath: NavigationPath
     
     @State private var products = [ProductModel]()
     func loadProducts() async {
@@ -16,7 +17,7 @@ struct ProductList: View {
     }
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navPath) {
             ScrollView{
                 LazyVGrid(
                     columns: [
@@ -44,5 +45,6 @@ struct ProductList: View {
 }
 
 #Preview {
-    ProductList()
+    @Previewable @State var path = NavigationPath()
+    ProductList(navPath: $path)
 }

@@ -27,7 +27,7 @@ class CartItemModel {
     // with reserved property names. The original data from
     // fakestoreapi.com uses `description` which is a reserved
     // name in Swift and causes errors.
-    private var productData: Data
+    var productData: Data
     
     init(product: ProductModel, amount: Int = 1) {
         self.id = product.id

@@ -13,6 +13,9 @@ struct QuickSwift_StoreApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: CartItemModel.self)
+        .modelContainer(for: [
+            CartItemModel.self,
+            OrderModel.self
+        ])
     }
 }

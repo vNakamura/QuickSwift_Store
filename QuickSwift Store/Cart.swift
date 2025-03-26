@@ -10,32 +10,32 @@ import SwiftUI
 
 struct Cart: View {
     static let tag = "__tag_cart__"
+    @Binding var navPath: NavigationPath
     
     @Query(sort: \CartItemModel.addedAt) private var items: [CartItemModel]
-    var startShoppingAction: (() -> Void)?
     @State private var viewingProduct: ProductModel? = nil
+    
     @Environment(\.modelContext) var modelContext
+    @Environment(\.clearShopPath) var clearShopPath
+    @Environment(\.changeTab) var changeTab
     
     private var subtotal: String {
         return CartItemModel.sum(of: items)
     }
     
     var body: some View {
-        NavigationStack {
-            Group {
-                if items.isEmpty {
-                    empty
-                } else {
-                    list
-                }
+        Group {
+            if items.isEmpty {
+                empty
+            } else {
+                list
             }
-            .sheet(item: $viewingProduct) { product in
-                ProductDetails(product: product, showRelated: false) {
-                    viewingProduct = nil
-                }
-                    .presentationDetents([.fraction(0.8), .large])
+        }
+        .sheet(item: $viewingProduct) { product in
+            ProductDetails(product: product, showRelated: false) {
+                viewingProduct = nil
             }
-            .navigationTitle("Shopping Cart")
+                .presentationDetents([.fraction(0.8), .large])
         }
     }
     
@@ -46,13 +46,13 @@ struct Cart: View {
             Text("Looks like you haven't added anything to your cart yet.")
         } actions: {
             Button("Start shopping") {
-                startShoppingAction?()
+                changeTab(ProductList.tag)
             }
         }
     }
     
     var list: some View {
-        NavigationStack {
+        NavigationStack(path: $navPath) {
             List {
                 ForEach(items) { item in
                     Button {
@@ -85,20 +85,22 @@ struct Cart: View {
                 }
             }
             .listRowSpacing(6)
+            .navigationTitle("Shopping Cart")
         }
     }
 }
 
 #Preview("With Items") {
+    @Previewable @State var path = NavigationPath()
     let _ = [
         CartItemModel(product: .withImage, amount: 2),
         CartItemModel(product: .withoutImage, amount: 1),
     ].forEach { item in
         previewContainer.mainContext.insert(item)
     }
-    Cart()
+    Cart(navPath: $path)
         .modelContainer(previewContainer)
 }
 #Preview("Empty") {
-    Cart()
+    Cart(navPath: .constant(NavigationPath()))
 }

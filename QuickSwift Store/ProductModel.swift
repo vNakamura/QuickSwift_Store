@@ -49,7 +49,7 @@ enum ProductService {
                 return decoded.shuffled()
             }
         } catch {
-            print("Could not load data")
+            print("Could not load product list")
         }
         return []
     }
@@ -79,7 +79,7 @@ enum ProductService {
                 }
             }
         } catch {
-            print("Could not load data")
+            print("Could not load related items")
         }
         return []
     }

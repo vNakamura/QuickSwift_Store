@@ -10,9 +10,16 @@ import SwiftData
 
 struct Checkout: View {
     @Query private var items: [CartItemModel]
+    
     @AppStorage("delivery_address") private var address = ""
     @State private var deliveryOption: DeliveryOptionModel = .sample[0]
-    @AppStorage("payment_card") private var paymentCard = ""
+    @AppStorage("payment_card") private var paymentCard = "*** 4242"
+    @State var showingAlert = false
+    
+    @Environment(\.modelContext) var modelContext
+    @Environment(\.clearShopPath) var clearShopPath
+    @Environment(\.clearCartPath) var clearCartPath
+    @Environment(\.changeTab) var changeTab
     
     var products: some View {
         Section {
@@ -117,9 +124,7 @@ struct Checkout: View {
             + Text(total)
                 .foregroundStyle(blocked ? .secondary : .primary)
                 .italic(blocked)
-            Button {
-                
-            } label: {
+            Button(action: createOrder) {
                 Text("Place Order")
                     .frame(minHeight: 32)
                     .frame(maxWidth: .infinity)
@@ -127,6 +132,19 @@ struct Checkout: View {
             .buttonStyle(.borderedProminent)
             .disabled(blocked)
         }
+    }
+    func createOrder() -> Void {
+        let order = OrderModel(
+            items: items,
+            deliveryAddress: address,
+            derliveryMethod: deliveryOption.name,
+            deliveryCost: ProductModel.format(price: deliveryOption.price),
+            paymentType: "Credit Card",
+            paymentIdentifier: paymentCard,
+            total: total
+        )
+        showingAlert = true
+        modelContext.insert(order)
     }
     
     var body: some View {
@@ -137,6 +155,23 @@ struct Checkout: View {
             complete
         }
         .navigationTitle("Checkout")
+        .alert("Order Sent", isPresented: $showingAlert) {
+            Button("My Orders") {
+                items.forEach { cartItem in
+                    modelContext.delete(cartItem)
+                }
+                clearCartPath()
+                //TODO: Show Orders
+            }
+            Button("OK") {
+                items.forEach { cartItem in
+                    modelContext.delete(cartItem)
+                }
+                clearCartPath()
+                clearShopPath()
+                changeTab(ProductList.tag)
+            }
+        }
     }
 }
 
