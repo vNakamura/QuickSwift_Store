@@ -10,6 +10,15 @@ import SwiftData
 
 @Model
 class CartItemModel {
+    static func sum(of items: [CartItemModel]) -> String {
+        let raw = items.reduce(0.0) { acc, item in
+            let itemPrice = item.product?.price ?? 0
+            let itemTotal = itemPrice * Double(item.amount)
+            return acc + itemTotal
+        }
+        return ProductModel.format(price: raw)
+    }
+    
     @Attribute(.unique) var id: Int
     var amount: Int
     var addedAt: Date

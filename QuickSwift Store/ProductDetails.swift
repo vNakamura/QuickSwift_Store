@@ -83,10 +83,10 @@ struct ProductDetails: View {
                     
                 }
                 .padding()
-                Spacer(minLength: 20)
                 if showRelated {
                 Text("Related items")
                     .font(.title2)
+                    .padding(.top, 10)
                     ScrollView(.horizontal){
                         HStack(spacing: 20) {
                             ForEach(relatedProducts) { related in

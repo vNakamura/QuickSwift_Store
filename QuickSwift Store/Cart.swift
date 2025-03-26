@@ -17,12 +17,7 @@ struct Cart: View {
     @Environment(\.modelContext) var modelContext
     
     private var subtotal: String {
-        let raw = items.reduce(0.0) { acc, item in
-            let itemPrice = item.product?.price ?? 0
-            let itemTotal = itemPrice * Double(item.amount)
-            return acc + itemTotal
-        }
-        return ProductModel.format(price: raw)
+        return CartItemModel.sum(of: items)
     }
     
     var body: some View {
@@ -38,8 +33,7 @@ struct Cart: View {
                 ProductDetails(product: product, showRelated: false) {
                     viewingProduct = nil
                 }
-                    .presentationDetents([.fraction(0.75), .large])
-                    .presentationCompactAdaptation(.none)
+                    .presentationDetents([.fraction(0.8), .large])
             }
             .navigationTitle("Shopping Cart")
         }
@@ -85,7 +79,7 @@ struct Cart: View {
                     Text(subtotal)
                 }
                 NavigationLink {
-                    Text("Checkout")
+                    Checkout()
                 } label: {
                     Label("Checkout", systemImage: "shippingbox")
                 }
