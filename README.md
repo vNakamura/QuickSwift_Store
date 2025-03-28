@@ -13,8 +13,8 @@ This is an active work-in-progress project built to refresh SwiftUI skills and d
 * [x] Related items suggestion feature
 * [x] Add to cart interaction
 * [x] Change cart items quantity and remove from cart
-* [ ] Checkout screen
-* [ ] User tab with order history
+* [x] Checkout screen
+* [x] User tab with order history
 * [ ] Favorites list
 * [ ] Custom UI/UX improvements
 * [ ] Animations

@@ -11,5 +11,6 @@ import SwiftUI
 extension EnvironmentValues {
     @Entry var clearShopPath: () -> Void = {}
     @Entry var clearCartPath: () -> Void = {}
+    @Entry var setUserNavPath: (User.subViewType?) -> Void = { _ in }
     @Entry var changeTab: (_ to: String) -> Void = { to in }
 }

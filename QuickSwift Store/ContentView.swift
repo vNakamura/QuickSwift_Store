@@ -12,6 +12,7 @@ struct ContentView: View {
     @State var currentTab = ProductList.tag
     @State var shopNavPath = NavigationPath()
     @State var cartNavPath = NavigationPath()
+    @State var userNavPath = NavigationPath()
     @Query private var cart: [CartItemModel]
     
     var body: some View {
@@ -26,8 +27,8 @@ struct ContentView: View {
                 Cart(navPath: $cartNavPath)
             }
             .badge(cart.reduce(0){ $0 + $1.amount })
-            Tab("User", systemImage: "person.fill", value: "user") {
-                Text("User")
+            Tab("User", systemImage: "person.fill", value: User.tag) {
+                User(navPath: $userNavPath)
             }
         }
         .environment(\.changeTab) { to in
@@ -38,6 +39,12 @@ struct ContentView: View {
         }
         .environment(\.clearCartPath) {
             cartNavPath = NavigationPath()
+        }
+        .environment(\.setUserNavPath) { subView in
+            userNavPath = NavigationPath()
+            if let subView = subView {
+                userNavPath.append(subView)
+            }
         }
     }
 }

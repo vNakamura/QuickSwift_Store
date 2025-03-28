@@ -92,10 +92,7 @@ struct Cart: View {
 
 #Preview("With Items") {
     @Previewable @State var path = NavigationPath()
-    let _ = [
-        CartItemModel(product: .withImage, amount: 2),
-        CartItemModel(product: .withoutImage, amount: 1),
-    ].forEach { item in
+    let _ = CartItemModel.samples.with2products.forEach { item in
         previewContainer.mainContext.insert(item)
     }
     Cart(navPath: $path)

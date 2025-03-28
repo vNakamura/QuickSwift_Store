@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CartItem: View {
     @Bindable var item: CartItemModel
+    var readOnly: Bool = false
     var onZero: (() -> Void)?
     
     var body: some View {
@@ -22,7 +23,7 @@ struct CartItem: View {
                     Spacer(minLength: 0)
                     HStack{
                         Text(
-                            item.product?.formattedPrice ?? ""
+                            product.formattedPrice
                         )
                         Spacer(minLength: 1)
                         ItemAmountStepper(

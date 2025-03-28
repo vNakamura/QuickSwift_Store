@@ -20,6 +20,10 @@ class OrderModel {
     var total: String
     var orderedAt: Date
     
+    var itemCount: Int {
+        items.reduce(0) { $0 + $1.amount }
+    }
+    
     init(
         items: [CartItemModel],
         deliveryAddress: String,
@@ -27,7 +31,8 @@ class OrderModel {
         deliveryCost: String,
         paymentType: String,
         paymentIdentifier: String,
-        total: String
+        total: String,
+        orderedAt: Date = Date()
     ) {
         self.id = UUID()
         self.items = items.map { cartItem in
@@ -39,7 +44,7 @@ class OrderModel {
         self.paymentType = paymentType
         self.paymentIdentifier = paymentIdentifier
         self.total = total
-        self.orderedAt = Date()
+        self.orderedAt = orderedAt
     }
 }
 

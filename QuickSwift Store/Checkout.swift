@@ -19,6 +19,7 @@ struct Checkout: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.clearShopPath) var clearShopPath
     @Environment(\.clearCartPath) var clearCartPath
+    @Environment(\.setUserNavPath) var setUserNavPath
     @Environment(\.changeTab) var changeTab
     
     var products: some View {
@@ -147,6 +148,13 @@ struct Checkout: View {
         modelContext.insert(order)
     }
     
+    private func clearCart() {
+        items.forEach { cartItem in
+            modelContext.delete(cartItem)
+        }
+        clearCartPath()
+    }
+    
     var body: some View {
         List {
             products
@@ -157,17 +165,12 @@ struct Checkout: View {
         .navigationTitle("Checkout")
         .alert("Order Sent", isPresented: $showingAlert) {
             Button("My Orders") {
-                items.forEach { cartItem in
-                    modelContext.delete(cartItem)
-                }
-                clearCartPath()
-                //TODO: Show Orders
+                clearCart()
+                changeTab(User.tag)
+                setUserNavPath(User.subViewType.allOrders)
             }
             Button("OK") {
-                items.forEach { cartItem in
-                    modelContext.delete(cartItem)
-                }
-                clearCartPath()
+                clearCart()
                 clearShopPath()
                 changeTab(ProductList.tag)
             }

@@ -11,7 +11,9 @@ import SwiftData
 struct ProductDetails: View {
     var product: ProductModel
     var showRelated: Bool
+    var readOnly: Bool
     var onRemove: (() -> Void)?
+    
     @State private var relatedProducts = [ProductModel]()
     @Environment(\.modelContext) private var modelContext
     @Query private var cartItems: [CartItemModel]
@@ -19,10 +21,12 @@ struct ProductDetails: View {
     init(
         product: ProductModel,
         showRelated: Bool = true,
+        readOnly: Bool = false,
         onRemove: (() -> Void)? = nil
     ) {
         self.product = product
         self.showRelated = showRelated
+        self.readOnly = readOnly
         self.onRemove = onRemove
         _cartItems = Query(
             filter: #Predicate { $0.id == product.id }
@@ -57,7 +61,9 @@ struct ProductDetails: View {
                     HStack {
                         Text(product.formattedPrice)
                         Spacer()
-                        if let item = cartItems.first {
+                        if readOnly {
+                            EmptyView()
+                        } else if let item = cartItems.first {
                             let amountBinding = Binding(
                                 get: { item.amount },
                                 set: { newValue in
@@ -117,6 +123,16 @@ struct ProductDetails: View {
 #Preview("No related items") {
     NavigationStack {
         ProductDetails(product: ProductModel.withImage, showRelated: false)
+    }
+    .modelContainer(previewContainer)
+}
+#Preview("Read only (Order history)") {
+    NavigationStack {
+        ProductDetails(
+            product: ProductModel.withImage,
+            showRelated: false,
+            readOnly: true
+        )
     }
     .modelContainer(previewContainer)
 }

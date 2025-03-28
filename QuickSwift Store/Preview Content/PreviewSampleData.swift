@@ -29,11 +29,47 @@ extension ProductModel {
     )
 }
 
+extension CartItemModel {
+    enum samples {
+        static let with2products = [
+            CartItemModel(product: .withImage, amount: 2),
+            CartItemModel(product: .withoutImage, amount: 1),
+        ]
+    }
+}
+
+extension OrderModel {
+    struct samples {
+        static let single = generate().first!
+        
+        static func generate(amount: Int = 1) -> [OrderModel] {
+            return (0..<amount).map { index in
+                let orderedAt = Calendar.current.date(
+                    byAdding: .day, value: -index, to: Date()
+                ) ?? Date()
+                return  OrderModel(
+                    items: CartItemModel.samples.with2products,
+                    deliveryAddress: "123 Main St.",
+                    derliveryMethod: "Regular",
+                    deliveryCost: "$4.99",
+                    paymentType: "Credit Card",
+                    paymentIdentifier: "**** 1234",
+                    total: "$123.45",
+                    orderedAt: orderedAt
+                )
+            }
+        }
+    }
+}
+
 @MainActor
 let previewContainer: ModelContainer = {
     do {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(for: CartItemModel.self, configurations: config)
+        let container = try ModelContainer(for: Schema([
+            CartItemModel.self,
+            OrderModel.self,
+        ]), configurations: config)
         
         return container
     } catch {
