@@ -22,83 +22,6 @@ struct Checkout: View {
     @Environment(\.setUserNavPath) var setUserNavPath
     @Environment(\.changeTab) var changeTab
     
-    var products: some View {
-        Section {
-            ForEach(items) { item in
-                if let product = item.product {
-                    VStack(alignment: .leading){
-                        Text(product.name)
-                            .truncationMode(.tail)
-                        HStack{
-                            Text(product.formattedPrice)
-                            + Text(" ⨉ \(item.amount)")
-                                .fontWeight(.bold)
-                            Spacer()
-                            Text(ProductModel.format(
-                                price: product.price,
-                                times: item.amount
-                            )).bold()
-                        }
-                    }
-                }
-            }
-        } header: {
-            Text("Products")
-        } footer: {
-            HStack{
-                Spacer()
-                Text("Subtotal: \(CartItemModel.sum(of: items))")
-                    .font(.headline)
-            }
-        }
-    }
-    
-    var delivery: some View {
-        Section {
-            NavigationLink {
-                AddressSearch(address: $address)
-            } label: {
-                Label {
-                    Text("Address: ").bold() + (
-                        address.isEmpty
-                        ? Text("Search").italic().foregroundStyle(.secondary)
-                        : Text(address)
-                    )
-                } icon: {
-                    Image(systemName: "map")
-                }
-            }
-            if !address.isEmpty {
-                ForEach(DeliveryOptionModel.sample) { option in
-                    DeliveryOption(option: option, selected: $deliveryOption)
-                }
-            }
-        } header: {
-            Text("Delivery")
-        }
-    }
-    
-    var payment: some View {
-        Section {
-            NavigationLink {
-                CardForm(input: $paymentCard)
-            } label: {
-                Label {
-                    Text("Credit Card: ").bold() + (
-                        paymentCard.isEmpty
-                        ? Text("Insert details")
-                            .italic().foregroundStyle(.secondary)
-                        : Text(paymentCard)
-                    )
-                } icon: {
-                    Image(systemName: "creditcard")
-                }
-            }
-        } header: {
-            Text("Payment")
-        }
-    }
-    
     var total: String {
         if address.isEmpty {
             return "Awaiting delivery info"
@@ -119,22 +42,8 @@ struct Checkout: View {
     var blocked: Bool {
         return address.isEmpty || paymentCard.isEmpty
     }
-    var complete: some View {
-        Section {
-            Text("Total: ").bold()
-            + Text(total)
-                .foregroundStyle(blocked ? .secondary : .primary)
-                .italic(blocked)
-            Button(action: createOrder) {
-                Text("Place Order")
-                    .frame(minHeight: 32)
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(blocked)
-        }
-    }
-    func createOrder() -> Void {
+    
+    private func createOrder() -> Void {
         let order = OrderModel(
             items: items,
             deliveryAddress: address,
@@ -157,10 +66,17 @@ struct Checkout: View {
     
     var body: some View {
         List {
-            products
-            delivery
-            payment
-            complete
+            CheckoutItems(items: items)
+            DeliverySection(
+                address: $address,
+                deliveryOption: $deliveryOption
+            )
+            PaymentSection(paymentCard: $paymentCard)
+            SendOrderSection(
+                total: total,
+                blocked: blocked,
+                onSendPress: createOrder
+            )
         }
         .navigationTitle("Checkout")
         .alert("Order Sent", isPresented: $showingAlert) {
@@ -173,6 +89,126 @@ struct Checkout: View {
                 clearCart()
                 clearShopPath()
                 changeTab(ProductList.tag)
+            }
+        }
+    }
+    
+    private struct CheckoutItems: View {
+        var items: [CartItemModel]
+        
+        var body: some View {
+            Section {
+                ForEach(items) { item in
+                    if let product = item.product {
+                        VStack(alignment: .leading){
+                            Text(product.name)
+                                .truncationMode(.tail)
+                            HStack{
+                                Text(product.formattedPrice)
+                                + Text(" ⨉ \(item.amount)")
+                                    .fontWeight(.bold)
+                                Spacer()
+                                Text(ProductModel.format(
+                                    price: product.price,
+                                    times: item.amount
+                                )).bold()
+                            }
+                        }
+                    }
+                }
+            } header: {
+                Text("Products")
+            } footer: {
+                HStack{
+                    Spacer()
+                    Text("Subtotal: \(CartItemModel.sum(of: items))")
+                        .font(.headline)
+                }
+            }
+        }
+    }
+    
+    private struct DeliverySection: View {
+        @Binding var address: String
+        @Binding var deliveryOption: DeliveryOptionModel
+        
+        var body: some View {
+            Section {
+                NavigationLink {
+                    AddressSearch(address: $address)
+                } label: {
+                    Label {
+                        Text("Address: ").bold() + (
+                            address.isEmpty
+                            ? Text("Search")
+                                .italic()
+                                .foregroundStyle(.secondary)
+                            : Text(address)
+                        )
+                    } icon: {
+                        Image(systemName: "map")
+                    }
+                }
+                if !address.isEmpty {
+                    ForEach(DeliveryOptionModel.sample) { option in
+                        DeliveryOption(
+                            option: option,
+                            selected: $deliveryOption
+                        )
+                    }
+                }
+            } header: {
+                Text("Delivery")
+            }
+        }
+    }
+    
+    private struct PaymentSection: View {
+        @Binding var paymentCard: String
+        
+        var body: some View {
+            Section {
+                NavigationLink{
+                    CardForm(input: $paymentCard)
+                } label: {
+                    Label {
+                        Text("Credit Card: ").bold() + (
+                            paymentCard.isEmpty
+                            ? Text("Insert details")
+                                .italic().foregroundStyle(.secondary)
+                            : Text(paymentCard)
+                        )
+                    } icon: {
+                        Image(systemName: "creditcard")
+                    }
+                }
+            } header: {
+                Text("Payment")
+            }
+        }
+    }
+    
+    private struct SendOrderSection: View {
+        var total: String
+        var blocked: Bool
+        var onSendPress: () -> Void
+        
+        var body: some View {
+            Section {
+                Text("Total: ").bold()
+                + Text(total)
+                    .foregroundStyle(blocked ? .secondary : .primary)
+                    .italic(blocked)
+                Button(action: onSendPress) {
+                    HStack {
+                        Spacer()
+                        Text("Place Order")
+                            .frame(minHeight: 32)
+                        Spacer()
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(blocked)
             }
         }
     }

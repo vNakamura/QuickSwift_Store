@@ -189,7 +189,8 @@ extension CardForm {
                             Spacer()
                             (
                                 Text("CVV: ").font(.caption)
-                                + Text(cvv).font(.title3).fontDesign(.monospaced)
+                                + Text(cvv).font(.title3)
+                                    .fontDesign(.monospaced)
                             )
                             .padding()
                         }
